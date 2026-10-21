@@ -1,0 +1,7 @@
+{
+  "tool_name": "Bash",
+  "tool_input_preview": "{\"command\":\"uv run python -c 'import grep_ast, networkx; print(\\\"uv deps ok\\\")'\",\"timeout\":120000,\"description\":\"Check project RepoGraph dependencies\"}",
+  "error": "Exit code 1\nTraceback (most recent call last):\n  File \"<string>\", line 1, in <module>\nModuleNotFoundError: No module named 'grep_ast'",
+  "timestamp": "2026-08-20T17:47:57.245Z",
+  "retry_count": 3
+}

@@ -1,0 +1,56 @@
+[BUG] Remove <think> in request to model. Required prerequisites:- [x] I have read the documentation <https://camel-ai.github.io/camel/camel.html>.
+- [x] I have searched the [Issue Tracker](https://github.com/camel-ai/camel/issues) and [Discussions](https://github.com/camel-ai/camel/discussions) that this hasn't already been reported. (+1 or comment there if it has.)
+- [ ] Consider asking first in a [Discussion](https://github.com/camel-ai/camel/discussions/new).
+
+### What version of camel are you using?
+
+0.2.21
+
+### System information
+
+/
+
+### Problem description
+
+for various model platforms support deepseek r1, we need to remove the <think> content in request to model 
+
+### Reproducible example code
+
+The Python snippets:
+
+```python
+
+```
+
+Command lines:
+
+```bash
+
+```
+
+Extra dependencies:
+
+```text
+
+```
+
+Steps to reproduce:
+
+1.
+2.
+3.
+
+
+### Traceback
+
+```pytb
+
+```
+
+### Expected behavior
+
+_No response_
+
+### Additional context
+
+_No response_

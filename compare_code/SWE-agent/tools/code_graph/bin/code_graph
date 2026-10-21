@@ -1,0 +1,455 @@
+#!/usr/bin/env python3
+
+import os
+import sys
+import json
+import ast
+import networkx as nx
+from pathlib import Path
+from collections import defaultdict
+from typing import List, Dict, Any, Set, Optional
+
+_USAGE_MSG = """Usage: code_graph <directory> <function_name>"""
+
+
+class CodeGraph:
+    """
+    Constructs and analyzes a code graph using Python AST.
+    """
+
+    def __init__(self, root_dir: str):
+        self.root_dir = Path(root_dir).resolve()
+        self.warned_files: Set[str] = set()
+        self.import_map: Dict[str, Dict[str, str]] = {}  # {rel_fname: {alias: full_import_path}}
+        self.parsed_file_trees: Dict[str, ast.AST] = {}  # {rel_fname: ast_tree}
+
+    def get_rel_fname(self, abs_fname: str) -> str:
+        """Get file path relative to the root directory."""
+        try:
+            abs_path = Path(abs_fname).resolve()
+            return str(abs_path.relative_to(self.root_dir))
+        except ValueError:
+            # If the file is not in the root directory, use the absolute path
+            return str(Path(abs_fname))
+
+    def _extract_imports_ast(self, tree: ast.AST, rel_fname: str):
+        """Extracts and resolves import statements from a file's AST."""
+        imports: Dict[str, str] = {}  # alias -> full_path
+
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Import):
+                for alias in node.names:
+                    name = alias.name
+                    asname = alias.asname or name.split(".")[-1]
+                    imports[asname] = name
+
+            elif isinstance(node, ast.ImportFrom):
+                module = node.module or ""
+                if node.level > 0:  # relative import
+                    current_dir_parts = list(Path(rel_fname).parent.parts)
+                    if node.level == 1:
+                        module = ".".join(current_dir_parts)
+                    else:
+                        module = ".".join(current_dir_parts[: -(node.level - 1)])
+
+                for alias in node.names:
+                    if alias.name == "*":
+                        imports["*"] = module
+                    else:
+                        name = alias.name
+                        asname = alias.asname or name
+                        full_path = f"{module}.{name}" if module else name
+                        imports[asname] = full_path
+
+        self.import_map[rel_fname] = imports
+
+    def _parse_file(self, abs_fname: str) -> Optional[ast.AST]:
+        """Parses a file with AST and caches the tree."""
+        rel_fname = self.get_rel_fname(abs_fname)
+        if rel_fname in self.parsed_file_trees:
+            return self.parsed_file_trees[rel_fname]
+
+        try:
+            with open(abs_fname, "r", encoding="utf-8") as f:
+                code = f.read()
+            if not code.strip():
+                return None
+            tree = ast.parse(code)
+            self.parsed_file_trees[rel_fname] = tree
+            # Extract imports right after parsing
+            self._extract_imports_ast(tree, rel_fname)
+            return tree
+        except Exception as e:
+            if abs_fname not in self.warned_files:
+                print(f"[-] Warning: Failed to read or parse file {abs_fname}: {e}", file=sys.stderr)
+                self.warned_files.add(abs_fname)
+            return None
+
+    def _get_definitions_from_file(self, abs_fname: str) -> List[Dict]:
+        """Extracts class, function, and method definitions from a file."""
+        definitions = []
+        tree = self._parse_file(abs_fname)
+        if not tree:
+            return definitions
+
+        rel_fname = self.get_rel_fname(abs_fname)
+
+        def process_node(node, class_context=None):
+            if isinstance(node, ast.ClassDef):
+                class_name = node.name
+                unique_id = f"{rel_fname}:{class_name}"
+
+                # Find methods in class
+                method_names = []
+                for child in node.body:
+                    if isinstance(child, ast.FunctionDef):
+                        method_names.append(child.name)
+
+                definitions.append({
+                    "unique_id": unique_id,
+                    "simple_name": class_name,
+                    "rel_fname": rel_fname,
+                    "fname": abs_fname,
+                    "line": node.lineno,
+                    "kind": "def",
+                    "category": "class",
+                    "info": f"methods: {', '.join(method_names)}" if method_names else f"class {class_name}",
+                    "ast_node": node
+                })
+
+                # Process methods
+                for child in node.body:
+                    if isinstance(child, ast.FunctionDef):
+                        process_node(child, class_context={"id": unique_id, "name": class_name})
+
+            elif isinstance(node, ast.FunctionDef):
+                func_name = node.name
+                category = "method" if class_context else "function"
+                if class_context:
+                    unique_id = f"{class_context['id']}::{func_name}"
+                else:
+                    unique_id = f"{rel_fname}::{func_name}"
+
+                definitions.append({
+                    "unique_id": unique_id,
+                    "simple_name": func_name,
+                    "rel_fname": rel_fname,
+                    "fname": abs_fname,
+                    "line": node.lineno,
+                    "kind": "def",
+                    "category": category,
+                    "info": f"def {func_name}(...)",
+                    "ast_node": node
+                })
+
+        # Process all top-level nodes
+        for node in tree.body:
+            process_node(node)
+
+        return definitions
+
+    def _extract_calls_from_node(self, node: ast.AST) -> List[List[str]]:
+        """Extract function calls from an AST node."""
+        calls = []
+
+        for child in ast.walk(node):
+            if isinstance(child, ast.Call):
+                call_parts = []
+                func = child.func
+
+                # Handle different call patterns
+                if isinstance(func, ast.Name):
+                    call_parts = [func.id]
+                elif isinstance(func, ast.Attribute):
+                    # Build call chain like obj.method or module.func
+                    parts = []
+                    current = func
+                    while isinstance(current, ast.Attribute):
+                        parts.insert(0, current.attr)
+                        current = current.value
+                    if isinstance(current, ast.Name):
+                        parts.insert(0, current.id)
+                        call_parts = parts
+
+                if call_parts:
+                    calls.append(call_parts)
+
+        return calls
+
+    def _resolve_call_target(self, call_name_parts: List[str], current_def: Dict, all_definitions_map: Dict[str, Dict]) -> Optional[str]:
+        """
+        Resolves a call to a unique definition ID.
+        """
+        if not call_name_parts:
+            return None
+
+        invoked_name = call_name_parts[-1]
+        base_object_parts = call_name_parts[:-1]
+
+        current_rel_fname = current_def["rel_fname"]
+        file_imports = self.import_map.get(current_rel_fname, {})
+
+        # Direct call in current file
+        if not base_object_parts:
+            # Check for function in current file
+            target_id = f"{current_rel_fname}::{invoked_name}"
+            if target_id in all_definitions_map:
+                return target_id
+
+            # Check for class in current file
+            target_id_class = f"{current_rel_fname}:{invoked_name}"
+            if target_id_class in all_definitions_map:
+                return target_id_class
+
+            # Check if it's an imported name
+            if invoked_name in file_imports:
+                full_import_path = file_imports[invoked_name]
+                parts = full_import_path.split(".")
+                potential_module_path = "/".join(parts[:-1]) + ".py" if len(parts) > 1 else f"{parts[0]}.py"
+                potential_item_name = parts[-1]
+
+                # Try as function
+                target_id = f"{potential_module_path}::{potential_item_name}"
+                if target_id in all_definitions_map:
+                    return target_id
+
+                # Try as class
+                target_id_class = f"{potential_module_path}:{potential_item_name}"
+                if target_id_class in all_definitions_map:
+                    return target_id_class
+
+            # Implicit self.method() call inside a method
+            if current_def["category"] == "method":
+                class_id_of_caller = current_def["unique_id"].rsplit("::", 1)[0]
+                target_id = f"{class_id_of_caller}::{invoked_name}"
+                if target_id in all_definitions_map:
+                    return target_id
+
+        # Method or attribute calls
+        elif base_object_parts:
+            base_name = base_object_parts[0]
+
+            # self.method()
+            if base_name == "self" and current_def["category"] == "method":
+                class_id_of_caller = current_def["unique_id"].rsplit("::", 1)[0]
+                target_id = f"{class_id_of_caller}::{invoked_name}"
+                if target_id in all_definitions_map:
+                    return target_id
+
+            # Imported module/class calls
+            elif base_name in file_imports:
+                full_import_of_base = file_imports[base_name]
+                full_target_path_parts = full_import_of_base.split(".") + base_object_parts[1:] + [invoked_name]
+                potential_target_module_parts = full_target_path_parts[:-1]
+                potential_target_item = full_target_path_parts[-1]
+                resolved_target_module_as_file = "/".join(potential_target_module_parts) + ".py"
+
+                target_id_func = f"{resolved_target_module_as_file}::{potential_target_item}"
+                if target_id_func in all_definitions_map:
+                    return target_id_func
+
+            # ClassName.method() in current file
+            else:
+                class_in_file_id = f"{current_rel_fname}:{base_name}"
+                if class_in_file_id in all_definitions_map:
+                    target_id = f"{class_in_file_id}::{invoked_name}"
+                    if target_id in all_definitions_map:
+                        return target_id
+
+        return None
+
+    def build_graph(self, file_paths: List[str]) -> nx.MultiDiGraph:
+        """Builds the code graph from a list of Python file paths."""
+        G = nx.MultiDiGraph()
+        all_definitions: List[Dict] = []
+
+        print(f"[*] Parsing files and extracting definitions...", file=sys.stderr)
+        for abs_fname in file_paths:
+            if not Path(abs_fname).is_file() or not abs_fname.endswith(".py"):
+                continue
+            defs_in_file = self._get_definitions_from_file(abs_fname)
+            all_definitions.extend(defs_in_file)
+
+        all_definitions_map = {d["unique_id"]: d for d in all_definitions}
+
+        print(f"[*] Adding {len(all_definitions_map)} definitions as graph nodes.", file=sys.stderr)
+        for unique_id, def_data in all_definitions_map.items():
+            G.add_node(
+                unique_id,
+                simple_name=def_data["simple_name"],
+                category=def_data["category"],
+                rel_fname=def_data["rel_fname"],
+                fname=def_data["fname"],
+                line=def_data["line"],
+                info=def_data["info"]
+            )
+
+        print(f"[*] Extracting calls and building graph edges...", file=sys.stderr)
+        for caller_id, caller_def in all_definitions_map.items():
+            if caller_def["category"] not in ["function", "method"]:
+                continue
+
+            caller_ast_node = caller_def.get("ast_node")
+            if not caller_ast_node:
+                continue
+
+            try:
+                calls = self._extract_calls_from_node(caller_ast_node)
+                for call_name_parts in calls:
+                    callee_id = self._resolve_call_target(call_name_parts, caller_def, all_definitions_map)
+                    if callee_id and callee_id in all_definitions_map and caller_id != callee_id:
+                        G.add_edge(caller_id, callee_id, type="CALLS")
+
+            except Exception as e:
+                print(f"[-] Error processing calls in {caller_id}: {e}", file=sys.stderr)
+
+        # Clean up ast_node from definitions data
+        for d in all_definitions:
+            if "ast_node" in d:
+                del d["ast_node"]
+
+        return G
+
+    def find_python_files(self, directory_path: str) -> List[str]:
+        """Finds all .py files in the directory, excluding __init__.py and test files."""
+        py_files = []
+        
+        # Convert to absolute path to ensure consistency
+        directory_path = str(Path(directory_path).resolve())
+        
+        for root_dir, _, files_in_dir in os.walk(directory_path):
+            for f_item in files_in_dir:
+                if f_item.endswith(".py"):
+                    abs_path = str(Path(root_dir) / f_item)
+                    # Basic filtering
+                    if "__init__.py" in f_item or "test" in f_item.lower() or "tests" in abs_path.lower():
+                        continue
+                    if "site-packages" in abs_path or "dist-packages" in abs_path:
+                        continue
+                    if ".venv" in abs_path or "venv" in abs_path or "env" in abs_path:
+                        continue
+
+                    py_files.append(abs_path)
+        return py_files
+
+
+def run_analysis(directory: str, target_function_name: str):
+    # Convert to absolute path
+    directory = str(Path(directory).resolve())
+    
+    if not os.path.isdir(directory):
+        print(f"Error: Directory '{directory}' does not exist or is not a directory.")
+        return 1
+
+    cg_builder = CodeGraph(root_dir=directory)
+    py_files = cg_builder.find_python_files(directory)
+
+    if not py_files:
+        print("No Python files found in the specified directory (excluding tests, __init__, venvs).")
+        return 1
+
+    print(f"[*] Found {len(py_files)} Python files to analyze.", file=sys.stderr)
+
+    graph = cg_builder.build_graph(py_files)
+
+    if not graph.nodes:
+        print("Could not build a code graph. No definitions found or error during graph construction.")
+        return 1
+
+    # Find nodes matching the target_function_name (simple name)
+    target_node_ids = [
+        node_id for node_id, data in graph.nodes(data=True) 
+        if data.get("simple_name") == target_function_name
+    ]
+
+    if not target_node_ids:
+        print(f"Function or Class with simple name '{target_function_name}' not found in the repository graph.")
+        return 1
+
+    returned_elements = []
+    processed_unique_ids = set()
+
+    for target_id in target_node_ids:
+        # Add target itself
+        if target_id not in processed_unique_ids and target_id in graph:
+            node_data = graph.nodes[target_id]
+            returned_elements.append({
+                "fname": node_data.get("fname"),
+                "rel_fname": node_data.get("rel_fname"),
+                "line": node_data.get("line"),
+                "name": node_data.get("simple_name"),
+                "unique_id": target_id,
+                "kind": "def",
+                "category": node_data.get("category"),
+                "info": node_data.get("info")
+            })
+            processed_unique_ids.add(target_id)
+
+        # Add successors (callees)
+        if target_id in graph:
+            for successor_id in graph.successors(target_id):
+                if successor_id not in processed_unique_ids and successor_id in graph:
+                    node_data = graph.nodes[successor_id]
+                    returned_elements.append({
+                        "fname": node_data.get("fname"),
+                        "rel_fname": node_data.get("rel_fname"),
+                        "line": node_data.get("line"),
+                        "name": node_data.get("simple_name"),
+                        "unique_id": successor_id,
+                        "kind": "def",
+                        "category": node_data.get("category"),
+                        "info": node_data.get("info")
+                    })
+                    processed_unique_ids.add(successor_id)
+
+            # Add predecessors (callers)
+            for predecessor_id in graph.predecessors(target_id):
+                if predecessor_id not in processed_unique_ids and predecessor_id in graph:
+                    node_data = graph.nodes[predecessor_id]
+                    returned_elements.append({
+                        "fname": node_data.get("fname"),
+                        "rel_fname": node_data.get("rel_fname"),
+                        "line": node_data.get("line"),
+                        "name": node_data.get("simple_name"),
+                        "unique_id": predecessor_id,
+                        "kind": "def",
+                        "category": node_data.get("category"),
+                        "info": node_data.get("info")
+                    })
+                    processed_unique_ids.add(predecessor_id)
+
+    # Print results as JSON
+    try:
+        print(json.dumps(returned_elements, indent=None))
+    except TypeError as e:
+        print(f"Error serializing output to JSON: {e}. Printing raw list.", file=sys.stderr)
+        print(returned_elements)
+
+    return 0
+
+
+def main_cli(args: List[str]) -> int:
+    if len(args) != 2:
+        print(_USAGE_MSG, file=sys.stderr)
+        if len(args) < 2:
+            print("Error: Missing arguments.", file=sys.stderr)
+        else:
+            print("Error: Too many arguments.", file=sys.stderr)
+        return 1
+
+    directory = args[0]
+    function_name = args[1]
+
+    # Basic validation
+    if not isinstance(directory, str) or not directory.strip():
+        print("Error: Directory must be a non-empty string.", file=sys.stderr)
+        return 1
+    if not isinstance(function_name, str) or not function_name.strip():
+        print("Error: Function name must be a non-empty string.", file=sys.stderr)
+        return 1
+
+    return run_analysis(directory, function_name)
+
+
+if __name__ == "__main__":
+    sys.exit(main_cli(sys.argv[1:]))

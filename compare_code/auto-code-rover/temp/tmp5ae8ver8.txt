@@ -1,0 +1,22 @@
+import chain AttributeError: 'NoneType' object has no attribute 'id'. Description
+
+When importing chain error occurs:
+
+AttributeError: 'NoneType' object has no attribute 'id'
+
+
+### Operating System
+
+- [X] Linux
+- [ ] Windows
+- [ ] MacOS
+
+### Acknowledgements
+
+- [X] I am NOT trying to use localhost for providers running outside of the docker container.
+- [X] I am NOT trying to run AGiXT outside of docker, the only supported method to run it.
+- [X] Python 3.10.X is installed and the version in use on the host machine.
+- [X] The latest version of Docker is installed and running on the host machine.
+- [X] I am using the latest stable version of AGiXT.
+- [X] I have provided enough information for the maintainers to reproduce and diagnose the issue.
+- [X] I have searched the existing issues to make sure this bug has not been reported yet.

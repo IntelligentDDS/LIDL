@@ -1,0 +1,84 @@
+[BUG] `kickoff` hangs when LLM call fails. Description
+
+`kickoff` hangs when LLM call fails
+
+### Steps to Reproduce
+
+Minmum example to reproduce the issue
+
+```python
+import os
+from crewai import Agent, Crew, Task
+
+
+# Enforce a request to the OpenAI API to fail
+os.environ["OPENAI_API_KEY"] = "sk-fake"
+
+simple_agent_1 = Agent(
+    role="City Selection Expert",
+    goal="Select the best city based on weather, season, and prices",
+    backstory="An expert in analyzing travel data to pick ideal destinations",
+    tools=[],
+    llm="gpt-4",
+)
+
+
+task_1 = Task(
+    description=("Analyze and select the best city for the trip"),
+    agent=simple_agent_1,
+    expected_output="Detailed report on the chosen city",
+)
+
+
+crew = Crew(agents=[simple_agent_1], tasks=[task_1])
+print(crew.kickoff())
+```
+
+### Expected behavior
+
+No hang
+
+### Screenshots/Code snippets
+
+See steps to reproduce
+
+### Operating System
+
+Ubuntu 20.04
+
+### Python Version
+
+3.10
+
+### crewAI Version
+
+0.98.0
+
+### crewAI Tools Version
+
+???
+
+### Virtual Environment
+
+Venv
+
+### Evidence
+
+```
+LiteLLM.Info: If you need to debug this error, use `litellm.set_verbose=True'.
+
+ERROR:root:LiteLLM call failed: litellm.AuthenticationError: AuthenticationError: OpenAIException - Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-fake. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'param': None, 'code': 'invalid_api_key'}}
+
+
+LiteLLM.Info: If you need to debug this error, use `litellm.set_verbose=True'.
+
+ERROR:root:LiteLLM call failed: litellm.AuthenticationError: AuthenticationError: OpenAIException - Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-fake. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'param': None, 'code': 'invalid_api_key'}}
+```
+
+### Possible Solution
+
+See `steps to reproduce`
+
+### Additional context
+
+N/A

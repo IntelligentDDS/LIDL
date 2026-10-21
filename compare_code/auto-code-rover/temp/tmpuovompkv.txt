@@ -1,0 +1,71 @@
+[BUG] Optional dependencies of TwitterToolkit, AskNewsToolkit, AsyncAskNewsToolkit are attempted to be imported when any toolkit is imported. Required prerequisites
+
+- [X] I have read the documentation <https://camel-ai.github.io/camel/camel.html>.
+- [X] I have searched the [Issue Tracker](https://github.com/camel-ai/camel/issues) and [Discussions](https://github.com/camel-ai/camel/discussions) that this hasn't already been reported. (+1 or comment there if it has.)
+- [ ] Consider asking first in a [Discussion](https://github.com/camel-ai/camel/discussions/new).
+
+### What version of camel are you using?
+
+01e5803d27febb80fe22f28253ae55dcd4779b36
+
+### System information
+
+Python 3.10.0 (v3.10.0:b494f5935c, Oct  4 2021, 14:59:19) [Clang 12.0.5 (clang-1205.0.22.11)] on darwin
+Type "help", "copyright", "credits" or "license" for more information.
+>>> import sys, camel
+>>> print(sys.version, sys.platform)
+3.10.0 (v3.10.0:b494f5935c, Oct  4 2021, 14:59:19) [Clang 12.0.5 (clang-1205.0.22.11)] darwin
+>>> print(camel.__version__)
+0.2.6
+
+
+### Problem description
+
+If no optional dependencies are installed, no toolkit can be imported, even if the one you are trying to use doesn't depend on an optional dependency
+
+### Reproducible example code
+
+The Python snippets:
+
+```python
+from camel.toolkits.math_toolkit import (MathToolkit)
+print("Hello, World!")
+```
+
+Gives this error:
+```
+Traceback (most recent call last):
+  File "<frozen importlib._bootstrap>", line 1027, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 992, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+  File "/Users/caelum/PycharmProjects/camel/camel/toolkits/__init__.py", line 39, in <module>
+    from .twitter_toolkit import TwitterToolkit, TWITTER_FUNCS
+  File "/Users/caelum/PycharmProjects/camel/camel/toolkits/twitter_toolkit.py", line 21, in <module>
+    from requests_oauthlib import OAuth1
+ModuleNotFoundError: No module named 'requests_oauthlib'
+```
+
+There are similar problems with `AskNewsToolkit`. 
+
+Some other toolkits with optional dependencies are fine, like `GoogleScholarToolkit`, likely because they aren't being instantiated in top level elements, like:
+```
+ASKNEWS_FUNCS: List[FunctionTool] = AskNewsToolkit().get_tools()
+```
+
+Extra dependencies:
+
+```text
+None
+```
+
+
+Steps to reproduce:
+
+1. Create a new poetry context
+2. Install just the required dependencies for camel
+3. Run the above code
+
+
+### Expected behavior
+
+These errors should arise only if those toolkits are being used without their optional dependencies being installed

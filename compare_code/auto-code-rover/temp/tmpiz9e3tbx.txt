@@ -1,0 +1,20 @@
+Memory Feature seems to not work on gpt3only mode
+1.Complete the environment setup for AutoGPT according to the instructions on this website: https://docs.agpt.co/autogpt/setup/.
+(Set API Keys for OpenAI, Pinecone, and Eleven Labs, then set the smart model to gpt-3.5-turbo)
+2.(cli mode)Use the command: "call python ./scripts/main.py --gpt3only --debug" to start AutoGPT with the --gpt3only option.
+3.Prompt GPT to be a developer, and give it the goal to load a design document text file into long term memory. and the additional goals to develop the project.
+(Prompt: 
+ai_goals:
+- Load the design document file under `./designdocument.txt` into long term memory.
+- Find out the currently created files in the unity project under `./UnityProject/Assets`,
+  then improve the code according to the design document, solving any issues or bugs
+  found.
+- Find out what needs to be implemented next, then implement it, then do this step
+  again until there is nothing left to implement.
+- Double check and make sure everything is implemented in the Unity Project Files
+  from your understanding of the project, then refine and criticize the code making
+  sure everything is in working order.
+- Shut Down.
+ai_name: Unity-Dev-GPT
+ai_role: An AI designed to build Video Games, Libraries, Editor Extensions, and Packages for Unity LTS 2021.)
+4.Allow AutoGPT to process the task and check for any JSON format errors or issues with memory handling.

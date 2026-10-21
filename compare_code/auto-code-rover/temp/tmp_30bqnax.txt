@@ -1,0 +1,28 @@
+language in detailed reports. Describe the bug**
+When asking for a detail report, there is a missing keyword argument 'language' 
+
+Error: 
+
+TypeError: generate_subtopic_report_prompt() got an unexpected keyword argument 'language'
+INFO:     connection closed
+
+If one add language to prompt.py
+in line 286 =>
+def generate_subtopic_report_prompt(
+    current_subtopic,
+    existing_headers: list,
+    relevant_written_contents: list,
+    main_topic: str,
+    context,
+    report_format: str = "apa",
+    max_subsections=5,
+    total_words=800,
+    tone: Tone = Tone.Objective,
+    **language="français",**
+
+There is no more error, but the subtopic report remain in english... 
+
+NB: I had an language var in my .env :
+LANGUAGE="french"
+
+Is it a bug or I made a mistake ? 

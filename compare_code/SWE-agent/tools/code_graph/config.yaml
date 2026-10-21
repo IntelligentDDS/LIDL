@@ -1,0 +1,14 @@
+tools:
+  code_graph:
+    signature: 'code_graph <directory> <function_name>'
+    docstring: "Builds a code knowledge graph to analyze function relationships and dependencies in the repository."
+    arguments:
+      - name: directory
+        type: string
+        description: "the directory path to analyze (must be an absolute path or relative to the repository root)"
+        required: true
+      - name: function_name
+        type: string
+        description: "the target function name to analyze"
+        required: true
+state_command: "_state"

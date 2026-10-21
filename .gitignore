@@ -1,0 +1,13 @@
+# Exclude Python environments and caches throughout the repository
+.venv/
+venv/
+__pycache__/
+.pytest_cache/
+*.py[cod]
+*.egg-info/
+.DS_Store
+
+# Exclude credentials and local configuration
+.env
+.env.*
+!.env.example

@@ -1,0 +1,59 @@
+Chain Query `too many values`. Description
+
+When querying via API or Strawberry, the generated query returns an error:
+
+```gql
+query MyQuery {
+  chain(chainName: "Another Chain") {
+    steps {
+      prompt {
+        chainName
+        promptCategory
+        commandName
+        promptName
+      }
+      agentName
+      promptType
+      step
+    }
+    chainName
+    id
+  }
+}
+```
+
+```
+{
+  "data": null,
+  "errors": [
+    {
+      "message": "too many values to unpack (expected 2)",
+      "locations": [
+        {
+          "line": 2,
+          "column": 3
+        }
+      ],
+      "path": [
+        "chain"
+      ]
+    }
+  ]
+}
+```
+
+### Operating System
+
+- [x] Linux
+- [ ] Windows
+- [ ] MacOS
+
+### Acknowledgements
+
+- [x] I am NOT trying to use localhost for providers running outside of the docker container.
+- [x] I am NOT trying to run AGiXT outside of docker, the only supported method to run it.
+- [x] Python 3.10.X is installed and the version in use on the host machine.
+- [x] The latest version of Docker is installed and running on the host machine.
+- [x] I am using the latest stable version of AGiXT.
+- [x] I have provided enough information for the maintainers to reproduce and diagnose the issue.
+- [x] I have searched the existing issues to make sure this bug has not been reported yet.

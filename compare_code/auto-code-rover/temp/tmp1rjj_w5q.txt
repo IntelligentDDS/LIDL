@@ -1,0 +1,61 @@
+[BUG] Crews not running on `o1-preview` or `o1-mini`. Description
+
+I defined the model to `o1-preview` or `o1-mini` and temperature to 1, and I get the following error
+
+```
+Error code: 400 - {\'error\': {\'message\': "Unsupported parameter: \'stop\' is not supported with this model.", \'type\': \'invalid_request_error\', \'param\': \'stop\', \'code\': \'unsupported_parameter\'}}
+```
+
+Apparently the `stop` parameter is used, and is not supported. I didn't find a way for the crew to no use this parameter
+
+### Steps to Reproduce
+
+Define LLM for an agent as 
+
+```llm=ChatOpenAI(model_name="o1-preview", temperature=1)```
+
+run the crew. 
+
+### Expected behavior
+
+Agent executes without error
+
+### Screenshots/Code snippets
+
+```llm=ChatOpenAI(model_name="o1-preview", temperature=1)```
+
+### Operating System
+
+macOS Sonoma
+
+### Python Version
+
+3.12
+
+### crewAI Version
+
+0.51.1
+
+### crewAI Tools Version
+
+0.51.1
+
+### Virtual Environment
+
+Venv
+
+### Evidence
+
+```
+Error code: 400 - {\'error\': {\'message\': "Unsupported parameter: \'stop\' is not supported with this model.", \'type\': \'invalid_request_error\', \'param\': \'stop\', \'code\': \'unsupported_parameter\'}}
+```
+
+
+
+### Possible Solution
+
+make stop parameter optional?
+
+### Additional context
+
+.

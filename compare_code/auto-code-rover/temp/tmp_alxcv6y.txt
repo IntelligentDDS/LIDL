@@ -1,0 +1,4 @@
+The LLM's answers sometimes contradict the truth or the content of the uploaded file
+1.In the RealChar UI, select a character to converse with.
+2.Ask the character vague or ambiguous questions/overly complex or contradictory Information
+like "Explain what it is." or "If the sun were blue, what color would the moon be?"

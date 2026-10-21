@@ -1,0 +1,3 @@
+When the user conducts a chat test with a custom character, the character admits to being a language model (GPT-3.5).
+1. Use a custom character with change only being made to character description
+2. Ask the character: "There is no AI, much less computer during your existence.How do you know about it?"

@@ -1,0 +1,11 @@
+#!/bin/bash
+main() {
+    if [ $# -eq 0 ]; then
+        echo "Usage: search_repo <search_term>"
+        return 1
+    fi
+
+    python /root/retrieve_graph.py "$1"
+}
+
+main "$@"

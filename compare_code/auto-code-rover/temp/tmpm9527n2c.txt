@@ -1,0 +1,149 @@
+[BUG] Flow @listen with _and error. Description
+
+Flow with parallel jobs and _and constraints fails to execute the _and constraint with funcs and strings passed.
+
+
+
+### Steps to Reproduce
+
+Step 1 create script.
+Step 2 install crewai version in venv with python 3.12
+Step 3 run script.
+
+I reduced my example to a minimal example to reproduce behavior. Notice how step 4_1 nor 4_2 execute.
+
+```python
+import asyncio
+
+from crewai.flow.flow import Flow, and_, listen, start
+
+
+class DummyFlow(Flow):
+    @start()
+    def step_1_1(self):
+        print("Starting 'step_1_1' method.")
+    
+    @start()
+    def step_1_2(self):
+        print("Starting 'step_1_2' method.")
+    
+    @listen(step_1_1)
+    def step_2(self):
+        print("Starting 'step_2' method.")
+        
+    @listen(step_2)
+    def step_3(self):
+        print("Starting 'step_3' method.")
+        
+    @listen(and_(step_1_1, step_3))
+    def step_4_1(self):
+        print("Starting 'step_4' method.")
+
+    @listen(and_("step_1_1", "step_3"))
+    def step_4_2(self):
+        print("Starting 'step_4' method.")
+        
+
+async def main():
+    podcast_flow = DummyFlow()
+    await podcast_flow.kickoff()
+
+
+asyncio.run(main())
+```
+
+The output is 
+```console
+$ python crewai_bug.py
+Starting 'step_1_1' method.
+Starting 'step_1_2' method.
+Starting 'step_2' method.
+Starting 'step_3' method.
+```
+
+
+### Expected behavior
+
+Steps 4_1 and 4_2 to be executed as stated in the documentation. (the super minimal example of the docs did work in my machine)
+
+### Screenshots/Code snippets
+
+```python
+import asyncio
+
+from crewai.flow.flow import Flow, and_, listen, start
+
+
+class DummyFlow(Flow):
+    @start()
+    def step_1_1(self):
+        print("Starting 'step_1_1' method.")
+    
+    @start()
+    def step_1_2(self):
+        print("Starting 'step_1_2' method.")
+    
+    @listen(step_1_1)
+    def step_2(self):
+        print("Starting 'step_2' method.")
+        
+    @listen(step_2)
+    def step_3(self):
+        print("Starting 'step_3' method.")
+        
+    @listen(and_(step_1_1, step_3))
+    def step_4_1(self):
+        print("Starting 'step_4' method.")
+
+    @listen(and_("step_1_1", "step_3"))
+    def step_4_2(self):
+        print("Starting 'step_4' method.")
+        
+
+async def main():
+    podcast_flow = DummyFlow()
+    await podcast_flow.kickoff()
+
+
+asyncio.run(main())
+```
+
+The output is 
+```console
+$ python crewai_bug.py
+Starting 'step_1_1' method.
+Starting 'step_1_2' method.
+Starting 'step_2' method.
+Starting 'step_3' me
+
+### Operating System
+
+Windows 11
+
+### Python Version
+
+3.12
+
+### crewAI Version
+
+0.70.1
+
+### crewAI Tools Version
+
+None
+
+### Virtual Environment
+
+Poetry
+
+### Evidence
+
+None
+
+### Possible Solution
+
+None
+
+### Additional context
+
+None

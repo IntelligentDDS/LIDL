@@ -1,0 +1,15 @@
+bug: error on log dumping due to invalid path - directory not found. I mistakenly configured an invalid api key. So the actual error looks like `Error: Response status code: 401. Error message: Access denied. Invalid API key.` but I wasn't able to see this message due to an error occurred during log dumping as below.
+
+```
+Error: ENOENT: no such file or directory, open '<path>/pythagora_tests/unit/errorLogs.log'
+    at Object.openSync (node:fs:601:3)
+    at Object.writeFileSync (node:fs:2249:35)
+    at generateTestsForDirectory (<path>/node_modules/pythagora/src/helpers/unitTests.js:382:12) {
+  errno: -2,
+  syscall: 'open',
+  code: 'ENOENT',
+  path: '<path>/pythagora_tests/unit/errorLogs.log'
+}
+```
+
+Fix: create the `unit` folder under `pythagora_tests`

@@ -1,0 +1,60 @@
+KeyError with OpenAI MODEL_CAPABILITIES. What happened?
+
+Location: https://github.com/microsoft/autogen/blob/main/python/packages/autogen-ext/src/autogen_ext/models/openai/_openai_client.py
+
+Line 131 in the above location raises a KeyError when you provide a model that is not in the MODEL_CAPABILITIES dict (eg. 'llama3-8b-8192').
+
+This is a big problem because the OpenAIChatCompletionClient should be usable with other providers.
+
+A couple changes of are required:
+
+1. Check that the model is in MODEL_CAPABILITIES. 
+2. If not, then may return a default dict. Some like {'function_calling': False, 'json_output': False, 'vision': False}.
+
+However, I suggest ignoring model capabilities entirely and let developers make sure that models that they use have the capabilities that are required. From there, you could just let the AsyncOpenAI client raise an exception.
+
+### What did you expect to happen?
+
+I expected the client to be unaware of the model that is set, like in the official openai sdk.
+
+### How can we reproduce it (as minimally and precisely as possible)?
+
+`
+from autogen_ext.models.openai import OpenAIChatCompletionClient
+
+groq_model_client = OpenAIChatCompletionClient(
+	model='llama3-groq-70b-8192-tool-use-preview',
+	base_url='https://api.groq.com/openai/v1',
+	api_key='<GROQ_API_KEY>'
+)
+# KeyError: 'llama3-groq-70b-8192-tool-use-preview'
+`
+
+### AutoGen version
+
+0.4.0.dev9
+
+### Which package was this bug in
+
+Extensions
+
+### Model used
+
+llama3-groq-70b-8192-tool-use-preview (Groq)
+
+### Python version
+
+3.12.5
+
+### Operating system
+
+Windows 11
+
+### Any additional info you think would be helpful for fixing this bug
+
+A couple changes of are required:
+
+1. Check that the model is in MODEL_CAPABILITIES. 
+2. If not, then may return a default dict. Some like {'function_calling': False, 'json_output': False, 'vision': False}.
+
+However, I suggest ignoring model capabilities entirely and let developers make sure that models that they use have the capabilities that are required. From there, you could just let the AsyncOpenAI client raise an exception.

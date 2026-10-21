@@ -1,0 +1,9 @@
+tools:
+  search_repo:
+    signature: "search_repo <search_term>"
+    docstring: "Search the current repository for a function or class and return its definition and reference relations"
+    arguments:
+      - name: search_term
+        type: string
+        description: "function or class to look for in the repository"
+        required: true

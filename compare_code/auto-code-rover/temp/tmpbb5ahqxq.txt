@@ -1,0 +1,84 @@
+AttributeError: 'Message' object has no attribute 'restricted_to'. ![image](https://github.com/geekan/MetaGPT/assets/49021250/36174081-2e1d-40ee-be58-0994948b33b2)
+
+```python
+ python start_game.py
+2024-05-31 02:42:33.932 | INFO     | metagpt.const:get_metagpt_package_root:29 - Package root set to /data0/lizhong/MetaGPT
+2024-05-31 02:42:39.139 | INFO     | __main__:start_game:34 - Game setup:
+Player1: Villager,
+Player2: Werewolf,
+Player3: Seer,
+Player4: Guard,
+Player5: Villager,
+Player6: Werewolf,
+Player7: Witch,
+2024-05-31 02:42:39.165 | INFO     | metagpt.team:invest:93 - Investment: $20.0.
+2024-05-31 02:42:39.172 | ERROR    | metagpt.utils.common:wrapper:631 - Exception occurs, start to serialize the project, exp:
+Traceback (most recent call last):
+  File "/data0/lizhong/MetaGPT/metagpt/utils/common.py", line 640, in wrapper
+    return await func(self, *args, **kwargs)
+  File "/data0/lizhong/MetaGPT/metagpt/roles/role.py", line 545, in run
+    if not await self._observe():
+AttributeError: 'Message' object has no attribute 'restricted_to'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/data0/lizhong/MetaGPT/metagpt/utils/common.py", line 626, in wrapper
+    result = await func(self, *args, **kwargs)
+  File "/data0/lizhong/MetaGPT/metagpt/team.py", line 131, in run
+    await self.env.run()
+Exception: Traceback (most recent call last):
+  File "/data0/lizhong/MetaGPT/metagpt/utils/common.py", line 640, in wrapper
+    return await func(self, *args, **kwargs)
+  File "/data0/lizhong/MetaGPT/metagpt/roles/role.py", line 545, in run
+    if not await self._observe():
+  File "/data0/lizhong/MetaGPT/metagpt/ext/werewolf/roles/base_player.py", line 63, in _observe
+    if len(m.restricted_to) and self.profile not in m.restricted_to and self.name not in m.restricted_to:
+  File "/data0/lizhong/anaconda3/envs/cu117-pt2.0/lib/python3.10/site-packages/pydantic/main.py", line 811, in __getattr__
+    raise AttributeError(f'{type(self).__name__!r} object has no attribute {item!r}')
+AttributeError: 'Message' object has no attribute 'restricted_to'
+
+
+Traceback (most recent call last):
+  File "/data0/lizhong/MetaGPT/examples/werewolf_game/start_game.py", line 68, in <module>
+    fire.Fire(main)
+  File "/data0/lizhong/anaconda3/envs/cu117-pt2.0/lib/python3.10/site-packages/fire/core.py", line 141, in Fire
+    component_trace = _Fire(component, args, parsed_flag_args, context, name)
+  File "/data0/lizhong/anaconda3/envs/cu117-pt2.0/lib/python3.10/site-packages/fire/core.py", line 466, in _Fire
+    component, remaining_args = _CallAndUpdateTrace(
+  File "/data0/lizhong/anaconda3/envs/cu117-pt2.0/lib/python3.10/site-packages/fire/core.py", line 681, in _CallAndUpdateTrace
+    component = fn(*varargs, **kwargs)
+  File "/data0/lizhong/MetaGPT/examples/werewolf_game/start_game.py", line 53, in main
+    asyncio.run(
+  File "/data0/lizhong/anaconda3/envs/cu117-pt2.0/lib/python3.10/asyncio/runners.py", line 44, in run
+    return loop.run_until_complete(main)
+  File "/data0/lizhong/anaconda3/envs/cu117-pt2.0/lib/python3.10/asyncio/base_events.py", line 649, in run_until_complete
+    return future.result()
+  File "/data0/lizhong/MetaGPT/examples/werewolf_game/start_game.py", line 40, in start_game
+    await game.run(n_round=n_round)
+  File "/data0/lizhong/MetaGPT/metagpt/utils/common.py", line 632, in wrapper
+    self.serialize()  # Team.serialize
+  File "/data0/lizhong/MetaGPT/metagpt/team.py", line 62, in serialize
+    write_json_file(team_info_path, serialized_data)
+  File "/data0/lizhong/MetaGPT/metagpt/utils/common.py", line 581, in write_json_file
+    json.dump(data, fout, ensure_ascii=False, indent=indent, default=to_jsonable_python)
+  File "/data0/lizhong/anaconda3/envs/cu117-pt2.0/lib/python3.10/json/__init__.py", line 179, in dump
+    for chunk in iterable:
+  File "/data0/lizhong/anaconda3/envs/cu117-pt2.0/lib/python3.10/json/encoder.py", line 431, in _iterencode
+    yield from _iterencode_dict(o, _current_indent_level)
+  File "/data0/lizhong/anaconda3/envs/cu117-pt2.0/lib/python3.10/json/encoder.py", line 405, in _iterencode_dict
+    yield from chunks
+  File "/data0/lizhong/anaconda3/envs/cu117-pt2.0/lib/python3.10/json/encoder.py", line 405, in _iterencode_dict
+    yield from chunks
+  File "/data0/lizhong/anaconda3/envs/cu117-pt2.0/lib/python3.10/json/encoder.py", line 405, in _iterencode_dict
+    yield from chunks
+  [Previous line repeated 1 more time]
+  File "/data0/lizhong/anaconda3/envs/cu117-pt2.0/lib/python3.10/json/encoder.py", line 325, in _iterencode_list
+    yield from chunks
+  File "/data0/lizhong/anaconda3/envs/cu117-pt2.0/lib/python3.10/json/encoder.py", line 438, in _iterencode
+    o = _default(o)
+pydantic_core._pydantic_core.PydanticSerializationError: Unable to serialize unknown type: <class 'pydantic._internal._model_construction.ModelMetaclass'>
+```
+
+
+When running the werewolf killing agent, the error in the above image appears. How can I solve it?

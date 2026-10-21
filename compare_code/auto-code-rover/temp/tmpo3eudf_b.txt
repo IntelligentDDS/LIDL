@@ -1,0 +1,5 @@
+Chains Allow Empty Names. Description
+
+Chains allow empty names to be POSTed which causes zod validation errors when they're sent back to the client.
+
+![Image](https://github.com/user-attachments/assets/a0f88b7c-7276-4bf5-8ef3-f95efb449102)

@@ -1,0 +1,37 @@
+unexpected keyword argument "refusal". Traceback (most recent call last):
+  File "/root/miniconda3/envs/ChatDev_conda_env/lib/python3.9/site-packages/tenacity/__init__.py", line 382, in __call__
+    result = fn(*args, **kwargs)
+  File "/code/chatdev/ChatDev/camel/utils.py", line 154, in wrapper
+    return func(self, *args, **kwargs)
+  File "/code/chatdev/ChatDev/camel/agents/chat_agent.py", line 243, in step
+    output_messages = [
+  File "/code/chatdev/ChatDev/camel/agents/chat_agent.py", line 244, in <listcomp>
+    ChatMessage(role_name=self.role_name, role_type=self.role_type,
+TypeError: __init__() got an unexpected keyword argument 'refusal'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/code/chatdev/ChatDev/run.py", line 134, in <module>
+    chat_chain.execute_chain()
+  File "/code/chatdev/ChatDev/chatdev/chat_chain.py", line 168, in execute_chain
+    self.execute_step(phase_item)
+  File "/code/chatdev/ChatDev/chatdev/chat_chain.py", line 138, in execute_step
+    self.chat_env = self.phases[phase].execute(self.chat_env,
+  File "/code/chatdev/ChatDev/chatdev/phase.py", line 295, in execute
+    self.chatting(chat_env=chat_env,
+  File "/code/chatdev/ChatDev/chatdev/utils.py", line 79, in wrapper
+    return func(*args, **kwargs)
+  File "/code/chatdev/ChatDev/chatdev/phase.py", line 133, in chatting
+    assistant_response, user_response = role_play_session.step(input_user_msg, chat_turn_limit == 1)
+  File "/code/chatdev/ChatDev/camel/agents/role_playing.py", line 247, in step
+    assistant_response = self.assistant_agent.step(user_msg_rst)
+  File "/root/miniconda3/envs/ChatDev_conda_env/lib/python3.9/site-packages/tenacity/__init__.py", line 289, in wrapped_f
+    return self(f, *args, **kw)
+  File "/root/miniconda3/envs/ChatDev_conda_env/lib/python3.9/site-packages/tenacity/__init__.py", line 379, in __call__
+    do = self.iter(retry_state=retry_state)
+  File "/root/miniconda3/envs/ChatDev_conda_env/lib/python3.9/site-packages/tenacity/__init__.py", line 326, in iter
+    raise retry_exc from fut.exception()
+tenacity.RetryError: RetryError[<Future at 0x7f0049d10c40 state=finished raised TypeError>]
+
+![image](https://github.com/user-attachments/assets/1ca07af1-a308-48bc-8054-6569f97646e8)

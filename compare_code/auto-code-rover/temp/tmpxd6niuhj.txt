@@ -1,0 +1,90 @@
+[BUG]UnicodeDecodeError: 'gbk' codec can't decode byte 0xac in position 102: illegal multibyte sequence. Description
+
+When loading a variable from the yaml environment, the crewai library tries to load it in gbk encoding as soon as Chinese is present in it, but my yaml file is utf-8. You want to add a measure to detect file encoding when loading yaml files
+
+### Steps to Reproduce
+
+1. edit agent.yaml or task.yaml
+2. Write a lot of Chinese into the above two yaml files
+3. crewai run
+
+### Expected behavior
+
+When loading yaml files, it automatically detects whether the file encoding is gbk or utf-8 or something else, and loads the file in this encoding format because it involves the definition of agents and the definition of tasks, and people in many other countries may use different encodings
+
+### Screenshots/Code snippets
+![image](https://github.com/user-attachments/assets/55369f4d-8086-4672-8610-d4b35f1079d5)
+
+
+
+### Operating System
+
+Windows 11
+
+### Python Version
+
+3.12
+
+### crewAI Version
+
+0.51.0
+
+### crewAI Tools Version
+
+0.51.0
+
+### Virtual Environment
+
+Poetry
+
+### Evidence
+
+`
+crewai run
+C:\Users\jonty\AppData\Local\pypoetry\Cache\virtualenvs\crew-agent-OgCTPeQm-py3.12\Lib\site-packages\pydantic\_internal\_config.py:341: UserWarning: Valid config keys have changed in V2:
+* 'allow_population_by_field_name' has been renamed to 'populate_by_name'
+* 'smart_union' has been removed
+  warnings.warn(message, UserWarning)
+Running the crew
+C:\Users\jonty\AppData\Local\pypoetry\Cache\virtualenvs\crew-agent-OgCTPeQm-py3.12\Lib\site-packages\pydantic\_internal\_config.py:341: UserWarning: Valid config keys have changed in V2:
+* 'allow_population_by_field_name' has been renamed to 'populate_by_name'
+* 'smart_union' has been removed
+  warnings.warn(message, UserWarning)
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "C:\Users\jonty\PycharmProjects\crew_agent\src\crew_agent\main.py", line 22, in run
+    CrewAgentCrew().crew().kickoff(inputs=inputs)
+    ^^^^^^^^^^^^^^^
+  File "C:\Users\jonty\AppData\Local\pypoetry\Cache\virtualenvs\crew-agent-OgCTPeQm-py3.12\Lib\site-packages\crewai\project\crew_base.py", line 38, in __init__
+    self.agents_config = self.load_yaml(
+                         ^^^^^^^^^^^^^^^
+  File "C:\Users\jonty\AppData\Local\pypoetry\Cache\virtualenvs\crew-agent-OgCTPeQm-py3.12\Lib\site-packages\crewai\project\crew_base.py", line 53, in load_yaml
+    return yaml.safe_load(file)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\jonty\AppData\Local\pypoetry\Cache\virtualenvs\crew-agent-OgCTPeQm-py3.12\Lib\site-packages\yaml\__init__.py", line 125, in safe_load
+    return load(stream, SafeLoader)
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\jonty\AppData\Local\pypoetry\Cache\virtualenvs\crew-agent-OgCTPeQm-py3.12\Lib\site-packages\yaml\__init__.py", line 79, in load
+    loader = Loader(stream)
+             ^^^^^^^^^^^^^^
+  File "C:\Users\jonty\AppData\Local\pypoetry\Cache\virtualenvs\crew-agent-OgCTPeQm-py3.12\Lib\site-packages\yaml\loader.py", line 34, in __init__
+    Reader.__init__(self, stream)
+  File "C:\Users\jonty\AppData\Local\pypoetry\Cache\virtualenvs\crew-agent-OgCTPeQm-py3.12\Lib\site-packages\yaml\reader.py", line 85, in __init__
+    self.determine_encoding()
+  File "C:\Users\jonty\AppData\Local\pypoetry\Cache\virtualenvs\crew-agent-OgCTPeQm-py3.12\Lib\site-packages\yaml\reader.py", line 124, in determine_encoding
+    self.update_raw()
+  File "C:\Users\jonty\AppData\Local\pypoetry\Cache\virtualenvs\crew-agent-OgCTPeQm-py3.12\Lib\site-packages\yaml\reader.py", line 178, in update_raw
+    data = self.stream.read(size)
+           ^^^^^^^^^^^^^^^^^^^^^^
+UnicodeDecodeError: 'gbk' codec can't decode byte 0xac in position 102: illegal multibyte sequence
+An error occurred while running the crew: Command '['poetry', 'run', 'run_crew']' returned non-zero exit status 1.
+
+`
+
+### Possible Solution
+
+When loading yaml files, it automatically detects whether the file encoding is gbk or utf-8 or something else, and loads the file in this encoding format because it involves the definition of agents and the definition of tasks, and people in many other countries may use different encodings
+
+### Additional context
+
+no

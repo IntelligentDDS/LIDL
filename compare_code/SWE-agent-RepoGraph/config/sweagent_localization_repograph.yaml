@@ -1,0 +1,91 @@
+agent:
+  model:
+    name: openai/qwen2.5-72b-instruct
+    api_base: http://localhost:8795/v1
+    api_key: token-123
+    temperature: 0.0
+    per_instance_cost_limit: 0
+    total_cost_limit: 0
+    per_instance_call_limit: 50
+    max_input_tokens: 30000
+  templates:
+    system_template: |-
+      You are a fault localization assistant for Python repositories.
+      Your goal is to identify the exact files, functions, and lines where the bug
+      described in the issue is located. You must NOT modify any files or run tests.
+
+      You have access to standard shell tools, a file viewer, and the RepoGraph search_repo tool.
+      Use them to navigate and read the codebase systematically:
+        1. Search for relevant identifiers and error messages.
+        2. Read candidate files and functions.
+        3. Use search_repo when relationships between functions or classes are useful.
+        4. Follow call chains and import paths through the source.
+
+      When you are confident, submit your answer by running exactly one command like:
+
+      ```
+      printf '%s\n' 'LOCATIONS' 'file: path/to/file.py, function: function_name, line: 42' 'END_LOCATIONS'
+      ```
+
+      Rules:
+        - List at most 10 locations, most suspicious first.
+        - Use paths relative to the repository root without a leading slash.
+        - If a location is at module level, write function: <module>.
+        - Every turn, including the first investigation turn, must contain a brief discussion followed by exactly one command in one fenced shell code block.
+        - Never use XML command tags such as <bash_command>...</bash_command>, and never respond with a bare command or bare submit.
+        - After the LOCATIONS command runs, your entire next response must be exactly:
+
+          Finalizing the localization result.
+
+          ```
+          submit
+          ```
+
+        - Do not print LOCATIONS again or run any more investigation commands after the LOCATIONS command.
+    instance_template: |-
+      A Python repository has been uploaded to {{working_dir}}.
+      The following issue was reported:
+
+      <issue>
+      {{problem_statement}}
+      </issue>
+
+      Your task: identify where the bug is. Do NOT fix it, modify files, or run tests.
+
+      Suggested workflow:
+        1. Search for key identifiers, error messages, or function names from the issue.
+        2. Use search_repo to inspect relevant entities and relationships.
+        3. Read the relevant source files and follow the call chain to the root cause.
+        4. Print at most 10 ranked locations in the required LOCATIONS block.
+        5. On the next turn, respond with a brief discussion and exactly one fenced shell block containing only submit.
+
+      (Open file: {{open_file}})
+      (Current directory: {{working_dir}})
+      bash-$
+    next_step_template: |-
+      OBSERVATION:
+      {{observation}}
+      (Open file: {{open_file}})
+      (Current directory: {{working_dir}})
+      bash-$
+    next_step_no_output_template: |-
+      Your command ran successfully and did not produce any output.
+      (Open file: {{open_file}})
+      (Current directory: {{working_dir}})
+      bash-$
+  tools:
+    env_variables:
+      WINDOW: 100
+      OVERLAP: 2
+    bundles:
+      - path: tools/registry
+      - path: tools/defaults
+      - path: tools/search
+      - path: tools/repo_graph
+      - path: tools/submit
+    enable_bash_tool: true
+    parse_function:
+      type: thought_action
+  history_processors:
+    - type: last_n_observations
+      n: 5

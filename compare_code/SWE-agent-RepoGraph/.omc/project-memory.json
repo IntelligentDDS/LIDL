@@ -1,0 +1,158 @@
+{
+  "version": "1.0.0",
+  "lastScanned": 1787663117675,
+  "projectRoot": "/mnt/hdd/goutan/LLM/LIDL/compare_code/SWE-agent-RepoGraph",
+  "techStack": {
+    "languages": [
+      {
+        "name": "Python",
+        "version": null,
+        "confidence": "high",
+        "markers": [
+          "pyproject.toml"
+        ]
+      }
+    ],
+    "frameworks": [
+      {
+        "name": "flask",
+        "version": null,
+        "category": "backend"
+      },
+      {
+        "name": "pytest",
+        "version": null,
+        "category": "testing"
+      }
+    ],
+    "packageManager": null,
+    "runtime": null
+  },
+  "build": {
+    "buildCommand": null,
+    "testCommand": "pytest",
+    "lintCommand": "ruff check",
+    "devCommand": null,
+    "scripts": {}
+  },
+  "conventions": {
+    "namingStyle": null,
+    "importStyle": null,
+    "testPattern": null,
+    "fileOrganization": null
+  },
+  "structure": {
+    "isMonorepo": false,
+    "workspaces": [],
+    "mainDirectories": [],
+    "gitBranches": null
+  },
+  "customNotes": [],
+  "directoryMap": {
+    "__pycache__": {
+      "path": "__pycache__",
+      "purpose": null,
+      "fileCount": 2,
+      "lastAccessed": 1787663117670,
+      "keyFiles": [
+        "run_all.cpython-311.pyc",
+        "run_sweagent.cpython-311.pyc"
+      ]
+    },
+    "config": {
+      "path": "config",
+      "purpose": "Configuration files",
+      "fileCount": 2,
+      "lastAccessed": 1787663117671,
+      "keyFiles": [
+        "sweagent_defect_repograph.yaml",
+        "sweagent_localization_repograph.yaml"
+      ]
+    },
+    "repograph": {
+      "path": "repograph",
+      "purpose": null,
+      "fileCount": 3,
+      "lastAccessed": 1787663117671,
+      "keyFiles": [
+        "construct_graph.py",
+        "graph_searcher.py",
+        "utils.py"
+      ]
+    },
+    "results": {
+      "path": "results",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1787663117671,
+      "keyFiles": []
+    },
+    "sweagent": {
+      "path": "sweagent",
+      "purpose": null,
+      "fileCount": 4,
+      "lastAccessed": 1787663117672,
+      "keyFiles": [
+        "__init__.py",
+        "__main__.py",
+        "exceptions.py",
+        "types.py"
+      ]
+    },
+    "sweagent.egg-info": {
+      "path": "sweagent.egg-info",
+      "purpose": null,
+      "fileCount": 6,
+      "lastAccessed": 1787663117672,
+      "keyFiles": [
+        "PKG-INFO",
+        "SOURCES.txt",
+        "dependency_links.txt",
+        "entry_points.txt",
+        "requires.txt"
+      ]
+    },
+    "temp": {
+      "path": "temp",
+      "purpose": null,
+      "fileCount": 992,
+      "lastAccessed": 1787663117673,
+      "keyFiles": [
+        "tmp00gbtktu.yaml",
+        "tmp00lp64py.yaml",
+        "tmp0194hvh8.md",
+        "tmp01afzkm5.md",
+        "tmp02463hu4.md"
+      ]
+    },
+    "tools": {
+      "path": "tools",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1787663117673,
+      "keyFiles": []
+    },
+    "trajectories": {
+      "path": "trajectories",
+      "purpose": null,
+      "fileCount": 1,
+      "lastAccessed": 1787663117673,
+      "keyFiles": [
+        "README.md"
+      ]
+    },
+    "sweagent/api": {
+      "path": "sweagent/api",
+      "purpose": "API routes",
+      "fileCount": 6,
+      "lastAccessed": 1787663117674,
+      "keyFiles": [
+        "__init__.py",
+        "hooks.py",
+        "index.html"
+      ]
+    }
+  },
+  "hotPaths": [],
+  "userDirectives": []
+}

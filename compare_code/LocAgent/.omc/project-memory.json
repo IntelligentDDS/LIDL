@@ -1,0 +1,145 @@
+{
+  "version": "1.0.0",
+  "lastScanned": 1787246139989,
+  "projectRoot": "/mnt/hdd/goutan/LLM/LIDL/compare_code/LocAgent",
+  "techStack": {
+    "languages": [
+      {
+        "name": "Python",
+        "version": null,
+        "confidence": "high",
+        "markers": [
+          "requirements.txt"
+        ]
+      }
+    ],
+    "frameworks": [],
+    "packageManager": "pip",
+    "runtime": null
+  },
+  "build": {
+    "buildCommand": null,
+    "testCommand": null,
+    "lintCommand": null,
+    "devCommand": null,
+    "scripts": {}
+  },
+  "conventions": {
+    "namingStyle": null,
+    "importStyle": null,
+    "testPattern": null,
+    "fileOrganization": null
+  },
+  "structure": {
+    "isMonorepo": false,
+    "workspaces": [],
+    "mainDirectories": [
+      "assets",
+      "scripts"
+    ],
+    "gitBranches": null
+  },
+  "customNotes": [],
+  "directoryMap": {
+    "__pycache__": {
+      "path": "__pycache__",
+      "purpose": null,
+      "fileCount": 1,
+      "lastAccessed": 1787246139987,
+      "keyFiles": [
+        "auto_search_main.cpython-310.pyc"
+      ]
+    },
+    "assets": {
+      "path": "assets",
+      "purpose": "Static assets",
+      "fileCount": 1,
+      "lastAccessed": 1787246139988,
+      "keyFiles": [
+        "overview.png"
+      ]
+    },
+    "dependency_graph": {
+      "path": "dependency_graph",
+      "purpose": null,
+      "fileCount": 4,
+      "lastAccessed": 1787246139988,
+      "keyFiles": [
+        "__init__.py",
+        "batch_build_graph.py",
+        "build_graph.py",
+        "traverse_graph.py"
+      ]
+    },
+    "evaluation": {
+      "path": "evaluation",
+      "purpose": null,
+      "fileCount": 2,
+      "lastAccessed": 1787246139988,
+      "keyFiles": [
+        "eval_metric.py",
+        "run_evaluation.ipynb"
+      ]
+    },
+    "plugins": {
+      "path": "plugins",
+      "purpose": null,
+      "fileCount": 2,
+      "lastAccessed": 1787246139988,
+      "keyFiles": [
+        "__init__.py",
+        "requirement.py"
+      ]
+    },
+    "repo_index": {
+      "path": "repo_index",
+      "purpose": null,
+      "fileCount": 5,
+      "lastAccessed": 1787246139988,
+      "keyFiles": [
+        "__init__.py",
+        "file_context.py",
+        "repository.py",
+        "types.py",
+        "workspace.py"
+      ]
+    },
+    "scripts": {
+      "path": "scripts",
+      "purpose": "Build/utility scripts",
+      "fileCount": 3,
+      "lastAccessed": 1787246139988,
+      "keyFiles": [
+        "gen_bm25_index.sh",
+        "gen_graph_index.sh",
+        "run.sh"
+      ]
+    },
+    "util": {
+      "path": "util",
+      "purpose": null,
+      "fileCount": 6,
+      "lastAccessed": 1787246139988,
+      "keyFiles": [
+        "__init__.py",
+        "classify_issue.py",
+        "cost_analysis.py",
+        "extract_entity_from_issue.py",
+        "process_output.py"
+      ]
+    },
+    "repo_index/utils": {
+      "path": "repo_index/utils",
+      "purpose": "Utility functions",
+      "fileCount": 5,
+      "lastAccessed": 1787246139989,
+      "keyFiles": [
+        "__init__.py",
+        "colors.py",
+        "repo.py"
+      ]
+    }
+  },
+  "hotPaths": [],
+  "userDirectives": []
+}

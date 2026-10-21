@@ -1,0 +1,52 @@
+Check for kwargs["USE_STREAMLABS_TTS"].lower() doesn't work as bool object does not have lower. Description
+
+```
+agixt-agixt-1      |   File "/agixt/extensions/voice_chat.py", line 17, in __init__
+agixt-agixt-1      |     if kwargs["USE_STREAMLABS_TTS"].lower() == "true":
+agixt-agixt-1      | AttributeError: 'bool' object has no attribute 'lower'
+```
+
+
+
+### Steps to Reproduce the Bug
+
+1. Follow quick start instructions (clone, run shell script, it runs docker containers).
+2. Go to the OpenAI Agent to add an API key to the settings.
+3. Click save.
+4. In future error appears whenever trying to load settings page.
+
+### Expected Behavior
+
+Agent should save normally, error should not appear, perhaps there should be a way to reset this file to default?
+
+### Operating System
+
+- [ ] Linux
+- [ ] Microsoft Windows
+- [X] Apple MacOS
+- [ ] Android
+- [ ] iOS
+- [ ] Other
+
+### Python Version
+
+- [ ] Python <= 3.9
+- [ ] Python 3.10
+- [X] Python 3.11
+
+### Environment Type - Connection
+
+- [X] Local - You run AGiXT in your home network
+- [ ] Remote - You access AGiXT through the internet
+
+### Runtime environment
+
+- [X] Using docker compose
+- [ ] Using local
+- [ ] Custom setup (please describe above!)
+
+### Acknowledgements
+
+- [X] I have searched the existing issues to make sure this bug has not been reported yet.
+- [X] I am using the latest version of AGiXT.
+- [X] I have provided enough information for the maintainers to reproduce and diagnose the issue.

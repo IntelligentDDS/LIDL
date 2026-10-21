@@ -1,0 +1,17 @@
+tools:
+  split_string:
+    signature: |
+      split_string <input_string> [show_line_numbers]
+    docstring: >
+      Processes and formats flake8 output by splitting input string into lines
+      and formatting each line with proper prefixes.
+      Optionally shows line numbers when the second parameter is provided.
+    arguments:
+      - name: input_string
+        type: string
+        description: "the input string to process and format"
+        required: true
+      - name: show_line_numbers
+        type: boolean
+        description: "whether to show line numbers in the output"
+        required: false
